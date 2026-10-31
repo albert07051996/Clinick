@@ -17,6 +17,7 @@ type Props = {
   className?: string;
   id?: string;
   name?: string;
+  lang: Lang; // Add lang prop
 };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -34,6 +35,7 @@ function parseValue(v: string): { h: number | null; m: number | null } {
 
 export default function TimePicker({
   value, onChange, step = 15, required, disabled, placeholder = '--:--', className, id, name,
+  lang, // Use lang prop
 }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);

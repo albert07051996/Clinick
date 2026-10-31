@@ -1,16 +1,19 @@
 import { useRef, useState } from 'react';
 import { filesService } from '../../services/api/filesService';
+import { formatMoney } from '../../utils/money';
 
 interface ImageUploadProps {
   onUploadSuccess?: (url: string, publicId: string) => void;
   onError?: (error: string) => void;
   folder?: string;
+  lang: Lang; // Add lang prop
 }
 
 export default function ImageUpload({
   onUploadSuccess,
   onError,
   folder = 'profiles',
+  lang, // Use lang prop
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState('');
