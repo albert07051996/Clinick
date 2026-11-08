@@ -21,7 +21,7 @@ export default function ConsultationModal({
   initialProcedureId,
   source = 'homepage',
 }: ConsultationModalProps) {
-  const { t } = useLang();
+  const { t, pickI18n } = useLang();
   const copy = t.modal.consultation;
 
   const [form, setForm] = useState({ fullName: '', email: '', phone: '', message: '' });
@@ -151,7 +151,7 @@ export default function ConsultationModal({
                             : 'border border-stone-200 bg-white text-stone-600 hover:border-rose-300'
                         }`}
                       >
-                        {p.name}
+                        {pickI18n(p.name, p.nameRu, p.nameEn)}
                       </button>
                     ))}
                   </div>

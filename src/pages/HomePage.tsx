@@ -5,8 +5,9 @@ import { useLang } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/shared/LanguageSwitcher';
 import ConsultationModal from '../components/marketing/ConsultationModal';
 import DoctorsAvailabilitySection from '../components/marketing/DoctorsAvailabilitySection';
+import ClinicLocationSection from '../components/marketing/ClinicLocationSection';
+import { clinicLocation, clinicDirectionsUrl } from '../config/clinicLocation';
 import ZoomableImage from '../components/shared/ZoomableImage';
-import { formatMoney } from '../utils/money';
 import { proceduresService } from '../services/api/proceduresService';
 import { beforeAfterCasesService } from '../services/api/beforeAfterCasesService';
 import { reviewsService } from '../services/api/reviewsService';
@@ -15,7 +16,7 @@ import type { BeforeAfterCase, Procedure, Review } from '../types';
 export default function HomePage() {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
-  const { t, lang } = useLang();
+  const { t, formatMoney, pickI18n } = useLang();
   const [scrolled, setScrolled] = useState(false);
 
   // ─── Live data (public endpoints) ────────────────────────────────────────
@@ -56,16 +57,16 @@ export default function HomePage() {
     }
     return procedures.map((p) => ({
       key:       p.id,
-      title:     p.name,
+      title:     pickI18n(p.name, p.nameRu, p.nameEn),
       tag:       categoryLabel(p.category, t.procedures.tabs),
-      desc:      p.shortDescription ?? '',
-      priceFrom: formatMoney(p.basePrice, lang),
+      desc:      pickI18n(p.shortDescription, p.shortDescriptionRu, p.shortDescriptionEn),
+      priceFrom: formatMoney(p.basePrice),
       gradient:  gradientForCategory(p.category),
       Icon:      iconForCategory(p.category),
       imageUrl:  p.imageUrl,
       onBook:    () => openModal('homepage-procedures', p.id),
     }));
-  }, [procedures, lang, t.procedures.items, t.procedures.tabs]);
+  }, [procedures, formatMoney, pickI18n, t.procedures.items, t.procedures.tabs]);
 
   const beforeAfterCards = useMemo(() => {
     if (beforeAfter.length === 0) {
@@ -81,14 +82,15 @@ export default function HomePage() {
     }
     return beforeAfter.slice(0, 6).map((c, i) => ({
       key:     c.id,
-      label:   c.title || c.procedureName,
+      label:   pickI18n(c.title, c.titleRu, c.titleEn)
+                || pickI18n(c.procedureName, c.procedureNameRu, c.procedureNameEn),
       months:  `${c.monthsAfter} ${c.monthsAfter === 1 ? 'month' : 'months'}`,
       before:  c.beforeImageUrl,
       after:   c.afterImageUrl,
       gradientFrom: RESULT_META[i % RESULT_META.length].from,
       gradientTo:   RESULT_META[i % RESULT_META.length].to,
     }));
-  }, [beforeAfter, t.results.items]);
+  }, [beforeAfter, pickI18n, t.results.items]);
 
   const reviewCards = useMemo(() => {
     if (reviews.length === 0) {
@@ -141,7 +143,7 @@ export default function HomePage() {
             <li><a href="#surgeons"   className="hover:text-rose-700">{t.nav.surgeons}</a></li>
             <li><a href="#results"    className="hover:text-rose-700">{t.nav.results}</a></li>
             <li><a href="#why"        className="hover:text-rose-700">{t.nav.why}</a></li>
-            <li><a href="#contact"    className="hover:text-rose-700">{t.nav.contact}</a></li>
+            <li><a href="#location"   className="hover:text-rose-700">{t.nav.contact}</a></li>
           </ul>
 
           <div className="flex items-center gap-2">
@@ -610,6 +612,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ───────────── Location ───────────── */}
+      <ClinicLocationSection />
+
       {/* ───────────── Footer ───────────── */}
       <footer className="bg-stone-900 text-stone-400">
         <div className="mx-auto max-w-7xl px-6 py-12">
@@ -636,9 +641,21 @@ export default function HomePage() {
             <div>
               <h5 className="font-semibold text-white">{t.footer.contactH}</h5>
               <ul className="mt-4 space-y-2 text-sm">
-                <li>📞 +995 32 2 00 00 00</li>
-                <li>✉️ hello@aurea.ge</li>
-                <li>📍 Tbilisi · Vake</li>
+                <li>
+                  <a href={`tel:${clinicLocation.phone.replace(/\s/g, '')}`} className="hover:text-white">
+                    📞 {clinicLocation.phone}
+                  </a>
+                </li>
+                <li>
+                  <a href={`mailto:${clinicLocation.email}`} className="hover:text-white">
+                    ✉️ {clinicLocation.email}
+                  </a>
+                </li>
+                <li>
+                  <a href={clinicDirectionsUrl()} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    📍 {t.location.addressLine1}
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

@@ -5,12 +5,11 @@ import type { CreateDoctorRequest, Doctor, Specialization } from '../../types';
 import { useLang } from '../../contexts/LanguageContext';
 import { EmptyState, PageHeader, SkeletonTable } from './AdminProceduresPage';
 import ImagePicker from '../../components/shared/ImagePicker';
-import { formatMoney } from '../../utils/money';
 
 type EditorState = { mode: 'closed' } | { mode: 'create' } | { mode: 'edit'; doctor: Doctor };
 
 export default function AdminDoctorsPage() {
-  const { t, lang } = useLang();
+  const { t, formatMoney } = useLang();
   const d = t.admin.doctor;
   const c = t.admin.common;
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -122,7 +121,7 @@ export default function AdminDoctorsPage() {
                     <div className="truncate">{doc.email}</div>
                     <div className="text-xs text-stone-500">{doc.phoneNumber}</div>
                   </td>
-                  <td className="px-5 py-3 font-semibold">{formatMoney(doc.consultationFee, lang)}</td>
+                  <td className="px-5 py-3 font-semibold">{formatMoney(doc.consultationFee)}</td>
                   <td className="px-5 py-3">
                     {doc.isActive ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">

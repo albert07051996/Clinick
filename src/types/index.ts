@@ -136,8 +136,13 @@ export type UpdateMedicalHistoryRequest = Omit<CreateMedicalHistoryRequest, 'pat
 
 export interface Specialization {
   id: string;
+  /** Georgian / canonical name. */
   name: string;
+  nameRu?: string;
+  nameEn?: string;
   description?: string;
+  descriptionRu?: string;
+  descriptionEn?: string;
   createdAt: string;
   doctorCount?: number;    // active doctors assigned (backend computes)
 }
@@ -312,14 +317,21 @@ export interface CreateAppointmentRequest {
 
 export interface Procedure {
   id: string;
+  /** Georgian / canonical name. */
   name: string;
+  nameRu?: string;
+  nameEn?: string;
   slug: string;
   category: ProcedureCategory;
   basePrice: number;
   durationMinutes: number;
   recoveryDays: number;
   shortDescription?: string;
+  shortDescriptionRu?: string;
+  shortDescriptionEn?: string;
   description?: string;
+  descriptionRu?: string;
+  descriptionEn?: string;
   imageUrl?: string;
   isActive: boolean;
   displayOrder: number;
@@ -329,13 +341,19 @@ export interface Procedure {
 
 export interface CreateProcedureRequest {
   name: string;
+  nameRu?: string;
+  nameEn?: string;
   slug?: string;
   category: ProcedureCategory;
   basePrice: number;
   durationMinutes: number;
   recoveryDays: number;
   shortDescription?: string;
+  shortDescriptionRu?: string;
+  shortDescriptionEn?: string;
   description?: string;
+  descriptionRu?: string;
+  descriptionEn?: string;
   imageUrl?: string;
   imagePublicId?: string;
   displayOrder?: number;
@@ -348,13 +366,20 @@ export interface BeforeAfterCase {
   id: string;
   procedureId: string;
   procedureName: string;
+  procedureNameRu?: string;
+  procedureNameEn?: string;
   doctorId?: string;
   doctorName?: string;
+  /** Georgian / canonical title. */
   title: string;
+  titleRu?: string;
+  titleEn?: string;
   monthsAfter: number;
   beforeImageUrl: string;
   afterImageUrl: string;
   caption?: string;
+  captionRu?: string;
+  captionEn?: string;
   hasPatientConsent: boolean;
   isPublished: boolean;
   displayOrder: number;
@@ -366,12 +391,16 @@ export interface CreateBeforeAfterRequest {
   procedureId: string;
   doctorId?: string;
   title: string;
+  titleRu?: string;
+  titleEn?: string;
   monthsAfter: number;
   beforeImageUrl: string;
   beforeImagePublicId?: string;
   afterImageUrl: string;
   afterImagePublicId?: string;
   caption?: string;
+  captionRu?: string;
+  captionEn?: string;
   hasPatientConsent: boolean;
   displayOrder?: number;
 }

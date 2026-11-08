@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function SubmitReviewModal({ open, onClose, onSubmitted }: Props) {
-  const { t } = useLang();
+  const { t, pickI18n } = useLang();
   const copy = t.dashboard.review;
   const [procedures, setProcedures] = useState<Procedure[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -116,7 +116,9 @@ export default function SubmitReviewModal({ open, onClose, onSubmitted }: Props)
                 <select value={form.procedureId} onChange={(e) => setForm({ ...form, procedureId: e.target.value })}
                   className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-rose-400 focus:ring-2 focus:ring-rose-100">
                   <option value="">{copy.none}</option>
-                  {procedures.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  {procedures.map((p) => (
+                    <option key={p.id} value={p.id}>{pickI18n(p.name, p.nameRu, p.nameEn)}</option>
+                  ))}
                 </select>
               </div>
               <div>

@@ -1,23 +1,31 @@
 import type { Lang } from '../i18n/translations';
 
-/* Money renders in the user's chosen UI language.
-   - Georgian (ka) → "120 ₾"   (symbol trails, as locally conventional)
-   - Russian (ru) → "120 ₽"   (symbol trails, as locally conventional)
-   - Everyone else → "$120"    (clinic lists USD on the English / Russian site)
+/* Backend stores every price as a single `decimal` with no currency tag —
+   the clinic quotes everything in GEL. For non-Georgian UIs we convert at the
+   latest NBG rate (fetched by LanguageContext). If that fetch failed, the
+   fallback constants below keep prices in roughly the right order of
+   magnitude rather than crashing the page. */
 
-   Pricing on the backend stores a single `decimal` with no currency tag;
-   the clinic quotes in GEL/USD at the same numeric value. If that ever
-   splits (dual pricing), add a `currency` field to Procedure/Doctor and
-   switch this helper to a `(amount, currency, lang)` signature. */
+export type RateMap = {
+  usd?: number;   // GEL per 1 USD, e.g. 2.75
+  rub?: number;   // GEL per 1 RUB, e.g. 0.030
+};
 
-export function formatMoney(amount: number, lang: Lang): string {
-  const rounded = Math.round(amount);
-  const n = rounded.toLocaleString('en-US');
+const FALLBACK: Required<RateMap> = {
+  usd: 2.75,
+  rub: 0.030,
+};
+
+export function formatMoney(amountGel: number, lang: Lang, rates?: RateMap): string {
   if (lang === 'ka') {
-    return `${n} ₾`;
-  } else if (lang === 'ru') {
-    return `${n} ₽`;
-  } else {
-    return `$${n}`;
+    return `${Math.round(amountGel).toLocaleString('en-US')} ₾`;
   }
+
+  if (lang === 'ru') {
+    const r = rates?.rub && rates.rub > 0 ? rates.rub : FALLBACK.rub;
+    return `${Math.round(amountGel / r).toLocaleString('en-US')} ₽`;
+  }
+
+  const r = rates?.usd && rates.usd > 0 ? rates.usd : FALLBACK.usd;
+  return `$${Math.round(amountGel / r).toLocaleString('en-US')}`;
 }

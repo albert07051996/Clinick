@@ -3,7 +3,6 @@ import { appointmentsService } from '../../services/api/appointmentsService';
 import { doctorsService } from '../../services/api/doctorsService';
 import { useLang } from '../../contexts/LanguageContext';
 import TimePicker from '../shared/TimePicker';
-import { formatMoney } from '../../utils/money';
 import type { Doctor } from '../../types';
 
 interface Props {
@@ -13,7 +12,7 @@ interface Props {
 }
 
 export default function BookAppointmentModal({ open, onClose, onBooked }: Props) {
-  const { t, lang } = useLang();
+  const { t, formatMoney } = useLang();
   const copy = t.dashboard.book;
   // We standardize ALL date/time inputs to en-GB (24h + dd/mm/yyyy) regardless
   // of UI language — see src/utils/dateFormat.ts for the project-wide decision.
@@ -106,7 +105,7 @@ export default function BookAppointmentModal({ open, onClose, onBooked }: Props)
               <option value="">{loading ? copy.loading : copy.select}</option>
               {doctors.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.fullName} — {d.specializationName} ({formatMoney(d.consultationFee, lang)})
+                  {d.fullName} — {d.specializationName} ({formatMoney(d.consultationFee)})
                 </option>
               ))}
             </select>

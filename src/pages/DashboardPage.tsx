@@ -4,7 +4,6 @@ import { authService } from '../services/api/authService';
 import { appointmentsService, type AppointmentWithContext } from '../services/api/appointmentsService';
 import { AppointmentStatus, UserRole } from '../types';
 import { formatDateWithWeekday, formatTime } from '../utils/dateFormat';
-import { formatMoney } from '../utils/money';
 import { useLang } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/shared/LanguageSwitcher';
 import BookAppointmentModal from '../components/patient/BookAppointmentModal';
@@ -229,7 +228,7 @@ function AppointmentCard({ a, onCancel, cancelling, d }: {
   cancelling: boolean;
   d: ReturnType<typeof useLang>['t']['dashboard'];
 }) {
-  const { lang } = useLang();
+  const { formatMoney } = useLang();
   const dt = new Date(a.scheduledDateTime);
 
   const statusStyle: Record<string, string> = {
@@ -262,7 +261,7 @@ function AppointmentCard({ a, onCancel, cancelling, d }: {
           </p>
           {a.reason && <p className="mt-2 text-sm italic text-stone-500">"{a.reason}"</p>}
           <p className="mt-2 text-xs text-stone-500">
-            {d.appt.fee} <span className="font-semibold text-stone-900">{formatMoney(a.consultationFee, lang)}</span>
+            {d.appt.fee} <span className="font-semibold text-stone-900">{formatMoney(a.consultationFee)}</span>
             {' · '}{a.isPaid ? d.appt.paid : d.appt.unpaid}
           </p>
         </div>

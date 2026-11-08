@@ -3,11 +3,12 @@ import { specializationsService } from '../../services/api/specializationsServic
 import type { Specialization } from '../../types';
 import { useLang } from '../../contexts/LanguageContext';
 import { EmptyState, PageHeader, SkeletonTable } from './AdminProceduresPage';
+import { MultilingualTextField } from '../../components/shared/MultilingualInputs';
 
 type EditorState = { mode: 'closed' } | { mode: 'create' } | { mode: 'edit'; spec: Specialization };
 
 export default function AdminSpecializationsPage() {
-  const { t } = useLang();
+  const { t, pickI18n } = useLang();
   const s = t.admin.spec;
   const c = t.admin.common;
   const [items, setItems] = useState<Specialization[]>([]);
@@ -22,7 +23,7 @@ export default function AdminSpecializationsPage() {
   useEffect(() => { void reload(); }, []);
 
   const remove = async (spec: Specialization) => {
-    if (!confirm(s.confirmDelete.replace('{name}', spec.name))) return;
+    if (!confirm(s.confirmDelete.replace('{name}', pickI18n(spec.name, spec.nameRu, spec.nameEn)))) return;
     try {
       await specializationsService.delete(spec.id);
       setItems((prev) => prev.filter((x) => x.id !== spec.id));
@@ -62,10 +63,13 @@ export default function AdminSpecializationsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 text-sm">
-              {items.map((spec) => (
+              {items.map((spec) => {
+                const name = pickI18n(spec.name, spec.nameRu, spec.nameEn);
+                const desc = pickI18n(spec.description, spec.descriptionRu, spec.descriptionEn);
+                return (
                 <tr key={spec.id} className="hover:bg-stone-50/50">
-                  <td className="px-5 py-3 font-semibold">{spec.name}</td>
-                  <td className="px-5 py-3 text-stone-600">{spec.description || <span className="italic text-stone-400">—</span>}</td>
+                  <td className="px-5 py-3 font-semibold">{name}</td>
+                  <td className="px-5 py-3 text-stone-600">{desc || <span className="italic text-stone-400">—</span>}</td>
                   <td className="px-5 py-3">
                     <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-700">
                       {spec.doctorCount ?? 0}
@@ -88,7 +92,8 @@ export default function AdminSpecializationsPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -121,7 +126,14 @@ function SpecEditor({
   const { t } = useLang();
   const s = t.admin.spec;
   const c = t.admin.common;
-  const [form, setForm] = useState({ name: initial?.name ?? '', description: initial?.description ?? '' });
+  const [form, setForm] = useState({
+    name:          initial?.name          ?? '',
+    nameRu:        initial?.nameRu        ?? '',
+    nameEn:        initial?.nameEn        ?? '',
+    description:   initial?.description   ?? '',
+    descriptionRu: initial?.descriptionRu ?? '',
+    descriptionEn: initial?.descriptionEn ?? '',
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -129,7 +141,14 @@ function SpecEditor({
     e.preventDefault();
     setError(null); setSubmitting(true);
     try {
-      const payload = { name: form.name.trim(), description: form.description.trim() || undefined };
+      const payload = {
+        name:          form.name.trim(),
+        nameRu:        form.nameRu.trim()        || undefined,
+        nameEn:        form.nameEn.trim()        || undefined,
+        description:   form.description.trim()   || undefined,
+        descriptionRu: form.descriptionRu.trim() || undefined,
+        descriptionEn: form.descriptionEn.trim() || undefined,
+      };
       const saved = initial
         ? await specializationsService.update(initial.id, payload)
         : await specializationsService.create(payload);
@@ -154,24 +173,36 @@ function SpecEditor({
         <form onSubmit={submit} className="space-y-4 px-6 py-5">
           {error && <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</div>}
 
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-semibold text-stone-700">{c.name}</span>
-            <input
-              type="text" required value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder={s.namePh}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm placeholder-stone-400 shadow-sm focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
-            />
-          </label>
+          <MultilingualTextField
+            label={c.name}
+            required
+            placeholder={s.namePh}
+            ka={form.name}
+            ru={form.nameRu}
+            en={form.nameEn}
+            onChange={(lang, v) =>
+              setForm((prev) => ({
+                ...prev,
+                ...(lang === 'ka' ? { name: v } : lang === 'ru' ? { nameRu: v } : { nameEn: v }),
+              }))
+            }
+          />
+          <p className="-mt-2 text-xs text-stone-500">{c.langHint}</p>
 
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-semibold text-stone-700">{s.descOptional}</span>
-            <textarea
-              value={form.description} rows={3}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full resize-none rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm placeholder-stone-400 shadow-sm focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
-            />
-          </label>
+          <MultilingualTextField
+            as="textarea"
+            rows={3}
+            label={s.descOptional}
+            ka={form.description}
+            ru={form.descriptionRu}
+            en={form.descriptionEn}
+            onChange={(lang, v) =>
+              setForm((prev) => ({
+                ...prev,
+                ...(lang === 'ka' ? { description: v } : lang === 'ru' ? { descriptionRu: v } : { descriptionEn: v }),
+              }))
+            }
+          />
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="rounded-full px-5 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100">{c.cancel}</button>

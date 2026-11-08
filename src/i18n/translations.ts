@@ -126,6 +126,23 @@ const en = {
     secondary: 'I already have an account',
   },
 
+  location: {
+    eyebrow:       'Visit us',
+    title:         'Find the clinic',
+    subtitle:      'In the heart of Tbilisi — tap the map to get directions.',
+    addressLabel:  'Address',
+    addressLine1:  '12 Chavchavadze Ave.',
+    addressLine2:  'Tbilisi 0162, Georgia',
+    phoneLabel:    'Phone',
+    emailLabel:    'Email',
+    hoursLabel:    'Hours',
+    hoursWeekday:  'Mon – Fri · 10:00 – 20:00',
+    hoursSaturday: 'Sat · 11:00 – 18:00',
+    hoursSunday:   'Sun · closed',
+    directionsBtn: 'Get directions',
+    mapTitle:      'Aurea Aesthetics on the map',
+  },
+
   footer: {
     desc:        "Georgia's premier plastic surgery clinic — surgical artistry, world-class safety, and discreet, attentive care.",
     proceduresH: 'Procedures',
@@ -171,6 +188,10 @@ const en = {
       activeBadge:   'Active',
       inactiveBadge: 'Inactive',
       optional:      '(optional)',
+      langGeorgian:  'Georgian',
+      langRussian:   'Russian',
+      langEnglish:   'English',
+      langHint:      'Georgian is required; Russian and English fall back to the Georgian text if left blank.',
     },
     spec: {
       title:         'Specializations',
@@ -860,6 +881,23 @@ const ka = {
     secondary: 'უკვე მაქვს ანგარიში',
   },
 
+  location: {
+    eyebrow:       'გვეწვიეთ',
+    title:         'სად მოგვძებნით',
+    subtitle:      'თბილისის ცენტრში — დააჭირეთ რუკას და მიიღებთ მარშრუტს.',
+    addressLabel:  'მისამართი',
+    addressLine1:  'ი. ჭავჭავაძის გამზ. 12',
+    addressLine2:  'თბილისი 0162, საქართველო',
+    phoneLabel:    'ტელეფონი',
+    emailLabel:    'ელ.ფოსტა',
+    hoursLabel:    'სამუშაო საათები',
+    hoursWeekday:  'ორშ – პარ · 10:00 – 20:00',
+    hoursSaturday: 'შაბ · 11:00 – 18:00',
+    hoursSunday:   'კვი · დაკეტილია',
+    directionsBtn: 'მიიღე მარშრუტი',
+    mapTitle:      'Aurea Aesthetics რუკაზე',
+  },
+
   footer: {
     desc:        'საქართველოს წამყვანი პლასტიკური ქირურგიის კლინიკა — ქირურგიული ოსტატობა, მსოფლიო დონის უსაფრთხოება და მზრუნველი, პირადი მომსახურება.',
     proceduresH: 'პროცედურები',
@@ -905,6 +943,10 @@ const ka = {
       activeBadge:   'აქტიური',
       inactiveBadge: 'არააქტიური',
       optional:      '(არასავალდებულო)',
+      langGeorgian:  'ქართული',
+      langRussian:   'რუსული',
+      langEnglish:   'ინგლისური',
+      langHint:      'ქართული სავალდებულოა; რუსული და ინგლისური თუ ცარიელი დარჩება, გამოჩნდება ქართული ვერსია.',
     },
     spec: {
       title:         'სპეციალიზაციები',
@@ -1592,6 +1634,23 @@ const ru = {
     secondary: 'У меня уже есть аккаунт',
   },
 
+  location: {
+    eyebrow:       'Приходите',
+    title:         'Как нас найти',
+    subtitle:      'В центре Тбилиси — нажмите на карту, чтобы построить маршрут.',
+    addressLabel:  'Адрес',
+    addressLine1:  'пр. Чавчавадзе 12',
+    addressLine2:  'Тбилиси 0162, Грузия',
+    phoneLabel:    'Телефон',
+    emailLabel:    'Email',
+    hoursLabel:    'Часы работы',
+    hoursWeekday:  'Пн – Пт · 10:00 – 20:00',
+    hoursSaturday: 'Сб · 11:00 – 18:00',
+    hoursSunday:   'Вс · выходной',
+    directionsBtn: 'Проложить маршрут',
+    mapTitle:      'Aurea Aesthetics на карте',
+  },
+
   footer: {
     desc:        'Ведущая клиника пластической хирургии в Грузии — хирургическое мастерство, безопасность мирового уровня и тактичный, внимательный уход.',
     proceduresH: 'Процедуры',
@@ -1637,6 +1696,10 @@ const ru = {
       activeBadge:   'Активен',
       inactiveBadge: 'Неактивен',
       optional:      '(необязательно)',
+      langGeorgian:  'Грузинский',
+      langRussian:   'Русский',
+      langEnglish:   'Английский',
+      langHint:      'Грузинский обязателен; русский и английский, если оставить пустыми, будут показаны на грузинском.',
     },
     spec: {
       title:         'Специализации',

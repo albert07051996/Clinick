@@ -7,9 +7,10 @@ import type { BeforeAfterCase, CreateBeforeAfterRequest, Doctor, Procedure } fro
 import { useLang } from '../../contexts/LanguageContext';
 import { EmptyState, PageHeader, SkeletonTable } from './AdminProceduresPage';
 import ZoomableImage from '../../components/shared/ZoomableImage';
+import { MultilingualTextField } from '../../components/shared/MultilingualInputs';
 
 export default function AdminBeforeAfterPage() {
-  const { t } = useLang();
+  const { t, pickI18n } = useLang();
   const ba = t.admin.ba;
   const c = t.admin.common;
   const [items, setItems] = useState<BeforeAfterCase[]>([]);
@@ -48,7 +49,7 @@ export default function AdminBeforeAfterPage() {
   };
 
   const deleteCase = async (caseItem: BeforeAfterCase) => {
-    if (!confirm(ba.confirmDelete.replace('{title}', caseItem.title))) return;
+    if (!confirm(ba.confirmDelete.replace('{title}', pickI18n(caseItem.title, caseItem.titleRu, caseItem.titleEn)))) return;
     try {
       await beforeAfterCasesService.delete(caseItem.id);
       setItems((prev) => prev.filter((x) => x.id !== caseItem.id));
@@ -92,24 +93,27 @@ export default function AdminBeforeAfterPage() {
         <EmptyState title={ba.emptyTitle} body={ba.emptyBody} />
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((caseItem) => (
+          {filtered.map((caseItem) => {
+            const title = pickI18n(caseItem.title, caseItem.titleRu, caseItem.titleEn);
+            const procedureName = pickI18n(caseItem.procedureName, caseItem.procedureNameRu, caseItem.procedureNameEn);
+            return (
             <article key={caseItem.id} className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
               <div className="grid grid-cols-2">
                 <div className="relative aspect-square bg-stone-100">
-                  <ZoomableImage src={caseItem.beforeImageUrl} alt={`${ba.before} — ${caseItem.title}`} caption={`${ba.before} — ${caseItem.title}`} className="h-full w-full object-cover" />
+                  <ZoomableImage src={caseItem.beforeImageUrl} alt={`${ba.before} — ${title}`} caption={`${ba.before} — ${title}`} className="h-full w-full object-cover" />
                   <span className="pointer-events-none absolute left-2 top-2 rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-stone-800 backdrop-blur">{ba.before}</span>
                 </div>
                 <div className="relative aspect-square bg-stone-100">
-                  <ZoomableImage src={caseItem.afterImageUrl} alt={`${ba.after} — ${caseItem.title}`} caption={`${ba.after} — ${caseItem.title}`} className="h-full w-full object-cover" />
+                  <ZoomableImage src={caseItem.afterImageUrl} alt={`${ba.after} — ${title}`} caption={`${ba.after} — ${title}`} className="h-full w-full object-cover" />
                   <span className="pointer-events-none absolute right-2 top-2 rounded-full bg-stone-900 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">{ba.after}</span>
                 </div>
               </div>
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="truncate font-semibold">{caseItem.title}</h3>
+                    <h3 className="truncate font-semibold">{title}</h3>
                     <p className="truncate text-xs text-stone-500">
-                      {caseItem.procedureName}{caseItem.doctorName && ` · ${caseItem.doctorName}`} · {caseItem.monthsAfter} {ba.moPostOp}
+                      {procedureName}{caseItem.doctorName && ` · ${caseItem.doctorName}`} · {caseItem.monthsAfter} {ba.moPostOp}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -138,7 +142,8 @@ export default function AdminBeforeAfterPage() {
                 </div>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -162,19 +167,23 @@ function BeforeAfterEditor({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const { t } = useLang();
+  const { t, pickI18n } = useLang();
   const ba = t.admin.ba;
   const c = t.admin.common;
   const [procedures, setProcedures] = useState<Procedure[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [form, setForm] = useState({
-    procedureId:         initial?.procedureId ?? '',
-    doctorId:            initial?.doctorId ?? '',
-    title:               initial?.title ?? '',
-    monthsAfter:         initial?.monthsAfter ?? 6,
-    caption:             initial?.caption ?? '',
-    hasPatientConsent:   initial?.hasPatientConsent ?? false,
-    publishAfterSave:    false,
+    procedureId:       initial?.procedureId       ?? '',
+    doctorId:          initial?.doctorId          ?? '',
+    title:             initial?.title             ?? '',
+    titleRu:           initial?.titleRu           ?? '',
+    titleEn:           initial?.titleEn           ?? '',
+    monthsAfter:       initial?.monthsAfter       ?? 6,
+    caption:           initial?.caption           ?? '',
+    captionRu:         initial?.captionRu         ?? '',
+    captionEn:         initial?.captionEn         ?? '',
+    hasPatientConsent: initial?.hasPatientConsent ?? false,
+    publishAfterSave:  false,
   });
   const [beforeImg, setBeforeImg] = useState<{ url: string; publicId: string } | null>(
     initial ? { url: initial.beforeImageUrl, publicId: '' } : null,
@@ -216,12 +225,16 @@ function BeforeAfterEditor({
         procedureId:         form.procedureId,
         doctorId:            form.doctorId || undefined,
         title:               form.title.trim(),
+        titleRu:             form.titleRu.trim()   || undefined,
+        titleEn:             form.titleEn.trim()   || undefined,
         monthsAfter:         Number(form.monthsAfter) || 0,
         beforeImageUrl:      beforeImg.url,
         beforeImagePublicId: beforeImg.publicId || undefined,
         afterImageUrl:       afterImg.url,
         afterImagePublicId:  afterImg.publicId || undefined,
-        caption:             form.caption.trim() || undefined,
+        caption:             form.caption.trim()   || undefined,
+        captionRu:           form.captionRu.trim() || undefined,
+        captionEn:           form.captionEn.trim() || undefined,
         hasPatientConsent:   form.hasPatientConsent,
       };
 
@@ -271,7 +284,10 @@ function BeforeAfterEditor({
             <SelectField
               label={ba.procedure} value={form.procedureId}
               onChange={(v) => setForm({ ...form, procedureId: v })}
-              options={[{ value: '', label: ba.selectDots }, ...procedures.map((p) => ({ value: p.id, label: p.name }))]}
+              options={[
+                { value: '', label: ba.selectDots },
+                ...procedures.map((p) => ({ value: p.id, label: pickI18n(p.name, p.nameRu, p.nameEn) })),
+              ]}
             />
             <SelectField
               label={ba.surgeonOpt} value={form.doctorId}
@@ -281,11 +297,38 @@ function BeforeAfterEditor({
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr]">
-            <TextField label={ba.titleStar} required value={form.title} onChange={(v) => setForm({ ...form, title: v })} placeholder={ba.titlePh} />
+            <MultilingualTextField
+              label={ba.titleStar}
+              required
+              placeholder={ba.titlePh}
+              ka={form.title}
+              ru={form.titleRu}
+              en={form.titleEn}
+              onChange={(lang, v) =>
+                setForm((prev) => ({
+                  ...prev,
+                  ...(lang === 'ka' ? { title: v } : lang === 'ru' ? { titleRu: v } : { titleEn: v }),
+                }))
+              }
+            />
             <NumberField label={ba.months} value={form.monthsAfter} onChange={(v) => setForm({ ...form, monthsAfter: v })} />
           </div>
+          <p className="-mt-3 text-xs text-stone-500">{c.langHint}</p>
 
-          <TextArea label={ba.captionOpt} rows={2} value={form.caption} onChange={(v) => setForm({ ...form, caption: v })} />
+          <MultilingualTextField
+            as="textarea"
+            rows={2}
+            label={ba.captionOpt}
+            ka={form.caption}
+            ru={form.captionRu}
+            en={form.captionEn}
+            onChange={(lang, v) =>
+              setForm((prev) => ({
+                ...prev,
+                ...(lang === 'ka' ? { caption: v } : lang === 'ru' ? { captionRu: v } : { captionEn: v }),
+              }))
+            }
+          />
 
           <div className="space-y-2 rounded-2xl border border-rose-200 bg-rose-50/50 px-4 py-3">
             <label className="flex items-start gap-3 text-sm text-stone-700">
@@ -404,32 +447,6 @@ function ImageDropzone({
 
 /* ─── Shared mini form fields (local copies so file is self-contained) ─── */
 
-function TextField({ label, value, onChange, placeholder, required = false }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string; required?: boolean;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-stone-700">{label}</span>
-      <input
-        type="text" value={value} required={required} placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm placeholder-stone-400 shadow-sm focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
-      />
-    </label>
-  );
-}
-function TextArea({ label, value, onChange, rows = 3 }: { label: string; value: string; onChange: (v: string) => void; rows?: number }) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-stone-700">{label}</span>
-      <textarea
-        value={value} rows={rows}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full resize-none rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm placeholder-stone-400 shadow-sm focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
-      />
-    </label>
-  );
-}
 function NumberField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <label className="block">

@@ -5,12 +5,12 @@ import { ProcedureCategory as Categories } from '../../types';
 import { useLang } from '../../contexts/LanguageContext';
 import ImagePicker from '../../components/shared/ImagePicker';
 import ZoomableImage from '../../components/shared/ZoomableImage';
-import { formatMoney } from '../../utils/money';
+import { MultilingualTextField } from '../../components/shared/MultilingualInputs';
 
 type EditorState = { mode: 'closed' } | { mode: 'create' } | { mode: 'edit'; procedure: Procedure };
 
 export default function AdminProceduresPage() {
-  const { t, lang } = useLang();
+  const { t, formatMoney, pickI18n } = useLang();
   const p = t.admin.procedure;
   const c = t.admin.common;
   const [items, setItems] = useState<Procedure[]>([]);
@@ -111,8 +111,8 @@ export default function AdminProceduresPage() {
                     {proc.imageUrl ? (
                       <ZoomableImage
                         src={proc.imageUrl}
-                        alt={proc.name}
-                        caption={proc.name}
+                        alt={pickI18n(proc.name, proc.nameRu, proc.nameEn)}
+                        caption={pickI18n(proc.name, proc.nameRu, proc.nameEn)}
                         className="h-12 w-12 rounded-lg object-cover shadow-sm"
                       />
                     ) : (
@@ -120,7 +120,7 @@ export default function AdminProceduresPage() {
                     )}
                   </td>
                   <td className="px-5 py-3">
-                    <div className="font-semibold">{proc.name}</div>
+                    <div className="font-semibold">{pickI18n(proc.name, proc.nameRu, proc.nameEn)}</div>
                     <div className="text-xs text-stone-500">/{proc.slug}</div>
                   </td>
                   <td className="px-5 py-3">
@@ -128,7 +128,7 @@ export default function AdminProceduresPage() {
                       {catLabel(proc.category)}
                     </span>
                   </td>
-                  <td className="px-5 py-3 font-semibold">{formatMoney(proc.basePrice, lang)}</td>
+                  <td className="px-5 py-3 font-semibold">{formatMoney(proc.basePrice)}</td>
                   <td className="px-5 py-3 text-stone-500">{proc.displayOrder}</td>
                   <td className="px-5 py-3">
                     {proc.isActive ? (
@@ -195,16 +195,22 @@ function ProcedureEditor({
   const p = t.admin.procedure;
   const c = t.admin.common;
   const [form, setForm] = useState({
-    name:             initial?.name ?? '',
-    slug:             initial?.slug ?? '',
-    category:         initial?.category ?? Categories.Face as ProcedureCategory,
-    basePrice:        initial?.basePrice ?? 0,
-    durationMinutes:  initial?.durationMinutes ?? 60,
-    recoveryDays:     initial?.recoveryDays ?? 0,
-    shortDescription: initial?.shortDescription ?? '',
-    description:      initial?.description ?? '',
-    imageUrl:         initial?.imageUrl ?? '',
-    displayOrder:     initial?.displayOrder ?? 0,
+    name:               initial?.name               ?? '',
+    nameRu:             initial?.nameRu             ?? '',
+    nameEn:             initial?.nameEn             ?? '',
+    slug:               initial?.slug               ?? '',
+    category:           initial?.category           ?? Categories.Face as ProcedureCategory,
+    basePrice:          initial?.basePrice          ?? 0,
+    durationMinutes:    initial?.durationMinutes    ?? 60,
+    recoveryDays:       initial?.recoveryDays       ?? 0,
+    shortDescription:   initial?.shortDescription   ?? '',
+    shortDescriptionRu: initial?.shortDescriptionRu ?? '',
+    shortDescriptionEn: initial?.shortDescriptionEn ?? '',
+    description:        initial?.description        ?? '',
+    descriptionRu:      initial?.descriptionRu      ?? '',
+    descriptionEn:      initial?.descriptionEn      ?? '',
+    imageUrl:           initial?.imageUrl           ?? '',
+    displayOrder:       initial?.displayOrder       ?? 0,
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -218,16 +224,22 @@ function ProcedureEditor({
     setSubmitting(true);
     try {
       const payload: CreateProcedureRequest = {
-        name:             form.name.trim(),
-        slug:             form.slug.trim() || undefined,
-        category:         form.category,
-        basePrice:        Number(form.basePrice),
-        durationMinutes:  Number(form.durationMinutes),
-        recoveryDays:     Number(form.recoveryDays),
-        shortDescription: form.shortDescription.trim() || undefined,
-        description:      form.description.trim() || undefined,
-        imageUrl:         form.imageUrl.trim() || undefined,
-        displayOrder:     Number(form.displayOrder),
+        name:               form.name.trim(),
+        nameRu:             form.nameRu.trim()             || undefined,
+        nameEn:             form.nameEn.trim()             || undefined,
+        slug:               form.slug.trim()               || undefined,
+        category:           form.category,
+        basePrice:          Number(form.basePrice),
+        durationMinutes:    Number(form.durationMinutes),
+        recoveryDays:       Number(form.recoveryDays),
+        shortDescription:   form.shortDescription.trim()   || undefined,
+        shortDescriptionRu: form.shortDescriptionRu.trim() || undefined,
+        shortDescriptionEn: form.shortDescriptionEn.trim() || undefined,
+        description:        form.description.trim()        || undefined,
+        descriptionRu:      form.descriptionRu.trim()      || undefined,
+        descriptionEn:      form.descriptionEn.trim()      || undefined,
+        imageUrl:           form.imageUrl.trim()           || undefined,
+        displayOrder:       Number(form.displayOrder),
       };
       if (initial) {
         const updated = await proceduresService.update(initial.id, payload);
@@ -264,9 +276,20 @@ function ProcedureEditor({
           )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr]">
-            <TextField label={c.name}  value={form.name} onChange={(v) => change('name', v)}   required placeholder={p.namePh} />
+            <MultilingualTextField
+              label={c.name}
+              required
+              placeholder={p.namePh}
+              ka={form.name}
+              ru={form.nameRu}
+              en={form.nameEn}
+              onChange={(lang, v) =>
+                change(lang === 'ka' ? 'name' : lang === 'ru' ? 'nameRu' : 'nameEn', v)
+              }
+            />
             <TextField label={p.slug}  value={form.slug} onChange={(v) => change('slug', v)} placeholder={p.slugPh} />
           </div>
+          <p className="-mt-2 text-xs text-stone-500">{c.langHint}</p>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <SelectField label={p.colCategory} value={form.category} onChange={(v) => change('category', v as ProcedureCategory)}
@@ -280,8 +303,27 @@ function ProcedureEditor({
             <NumberField label={p.recoveryDays} value={form.recoveryDays}    onChange={(v) => change('recoveryDays', v)} />
           </div>
 
-          <TextField  label={p.shortDesc} value={form.shortDescription} onChange={(v) => change('shortDescription', v)} placeholder={p.shortDescPh} />
-          <TextArea   label={p.fullDesc}  value={form.description}      onChange={(v) => change('description', v)}      rows={4} />
+          <MultilingualTextField
+            label={p.shortDesc}
+            placeholder={p.shortDescPh}
+            ka={form.shortDescription}
+            ru={form.shortDescriptionRu}
+            en={form.shortDescriptionEn}
+            onChange={(lang, v) =>
+              change(lang === 'ka' ? 'shortDescription' : lang === 'ru' ? 'shortDescriptionRu' : 'shortDescriptionEn', v)
+            }
+          />
+          <MultilingualTextField
+            as="textarea"
+            rows={4}
+            label={p.fullDesc}
+            ka={form.description}
+            ru={form.descriptionRu}
+            en={form.descriptionEn}
+            onChange={(lang, v) =>
+              change(lang === 'ka' ? 'description' : lang === 'ru' ? 'descriptionRu' : 'descriptionEn', v)
+            }
+          />
           <div>
             <label className="mb-1.5 block text-sm font-semibold text-stone-700">{p.imageUrl}</label>
             <ImagePicker
@@ -358,19 +400,6 @@ function TextField({ label, value, onChange, placeholder, required = false }: {
         type="text" value={value} required={required} placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm placeholder-stone-400 shadow-sm transition-colors focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
-      />
-    </label>
-  );
-}
-
-function TextArea({ label, value, onChange, rows = 3 }: { label: string; value: string; onChange: (v: string) => void; rows?: number }) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-stone-700">{label}</span>
-      <textarea
-        value={value} rows={rows}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full resize-none rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm placeholder-stone-400 shadow-sm transition-colors focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
       />
     </label>
   );
